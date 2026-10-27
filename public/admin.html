@@ -1,0 +1,144 @@
+<!doctype html><html lang="id"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1"><title>LocalPrint Admin</title>
+<style>
+:root{--p:#4f46e5;--b:#e5e7eb}
+*{box-sizing:border-box}
+body{margin:0;font:14px system-ui,sans-serif;background:#f6f7fb;color:#1e1b4b}
+header{display:flex;justify-content:space-between;align-items:center;gap:10px;flex-wrap:wrap;padding:12px 24px;background:#fff;border-bottom:1px solid var(--b)}
+h1{font-size:18px;margin:0;color:var(--p)}
+main{max-width:1100px;margin:auto;padding:14px}
+.card{background:#fff;border:1px solid var(--b);border-radius:14px;padding:16px;box-shadow:0 1px 3px #0001;margin-bottom:14px}
+h2{font-size:15px;margin:0 0 4px}
+p.sub{margin:0 0 10px;color:#6b7280;font-size:12px}
+label{display:block;margin:10px 0 3px;font-weight:600;font-size:12px}
+input,select{width:100%;padding:8px;border:1px solid #d1d5db;border-radius:8px;font:inherit}
+button{background:var(--p);color:#fff;border:0;border-radius:9px;padding:9px 14px;font-weight:600;cursor:pointer}
+button.s{background:#e0e7ff;color:#3730a3;padding:4px 9px;font-size:12px}
+.grid{display:grid;grid-template-columns:1fr 1fr;gap:0 12px}
+@media(max-width:640px){.grid{grid-template-columns:1fr}header{padding:10px 12px}}
+.tool{border-top:1px solid #eee;padding:12px 0}
+.tool:first-of-type{border-top:0}
+.th{display:flex;gap:8px;align-items:center;flex-wrap:wrap}
+.badge{padding:2px 9px;border-radius:99px;font-size:12px;font-weight:600}
+.badge.ok{background:#dcfce7;color:#166534}.badge.no{background:#fee2e2;color:#991b1b}
+.tl{display:flex;gap:8px;align-items:center;flex-wrap:wrap;margin-top:6px}
+small,.muted{color:#6b7280;font-size:12px}
+code{background:#f3f4f6;padding:1px 5px;border-radius:5px;word-break:break-all}
+.err{color:#b91c1c}.ok{color:#166534}
+.row{display:flex;gap:8px;align-items:center;margin-top:12px;flex-wrap:wrap}
+#logs{font:12px ui-monospace,monospace;background:#0f172a;color:#e2e8f0;border-radius:8px;padding:10px;max-height:240px;overflow:auto;white-space:pre-wrap;word-break:break-all}
+a{color:var(--p)}
+.cb{display:flex;gap:6px;align-items:center;font-weight:400;margin:0}.cb input{width:auto}
+table{width:100%;border-collapse:collapse}
+th{text-align:left;font-size:12px;color:#6b7280;padding:6px;border-bottom:1px solid var(--b);white-space:nowrap}
+td{padding:6px;border-top:1px solid #eee;font-size:13px;vertical-align:top}
+</style></head><body>
+<header><h1>⚙ <span id="title">LocalPrint</span> Admin</h1>
+ <div class="row" style="margin:0"><a href="/">← Kembali ke cetak</a><input id="pin" type="password" placeholder="PIN admin (jika ada)" style="width:170px"></div></header>
+<main>
+<div id="auth" class="err" style="margin-bottom:10px"></div>
+
+<div class="card" id="hist"><h2>Riwayat cetak</h2>
+ <p class="sub">Semua pekerjaan cetak dari semua komputer. Pengguna biasa tidak melihat daftar ini.</p>
+ <div class="row" style="margin-top:0">
+  <input id="hq" placeholder="Cari dokumen / printer / IP komputer" style="flex:1;min-width:200px">
+  <select id="hst" style="width:auto"><option value="">Semua status</option><option value="submitted">Terkirim ke spooler</option><option value="completed">Selesai</option><option value="left_queue">Keluar dari antrean</option><option value="failed">Gagal</option><option value="canceled">Dibatalkan</option></select>
+  <button class="s" onclick="loadJobs(true)">Refresh</button>
+  <label class="cb"><input type="checkbox" id="hauto" checked> otomatis</label>
+  <button class="s" onclick="exportCsv()">Unduh CSV</button><span id="hmsg"></span>
+ </div>
+ <div style="overflow-x:auto;margin-top:8px"><table id="jt"></table></div>
+ <div class="row"><button class="s" id="hprev" onclick="hpage(-1)">&larr; Sebelumnya</button><span id="hinfo" class="muted"></span><button class="s" id="hnext" onclick="hpage(1)">Berikutnya &rarr;</button></div>
+</div>
+
+<div class="card"><h2>Lokasi program pendukung</h2>
+ <p class="sub">Kosongkan kolom = dicari otomatis. Pengaturan di sini diprioritaskan di atas file <code>.env</code> dan langsung berlaku tanpa restart. Isi path lengkap ke file .exe (di File Explorer: klik kanan file &gt; Copy as path).</p>
+ <div id="tools"></div>
+ <div class="row"><button onclick="saveTools()">Simpan lokasi program</button><button class="s" onclick="loadTools()">Muat ulang</button><span id="tmsg"></span></div>
+</div>
+
+<div class="card"><h2>Umum</h2>
+ <div class="grid">
+  <div><label>Nama aplikasi</label><input id="appName"></div>
+  <div><label>Printer bawaan</label><input id="defaultPrinter" list="plist" placeholder="(printer default Windows)"><datalist id="plist"></datalist></div>
+  <div><label>Ukuran file maksimum (MB)</label><input id="maxMb" type="number" min="1" max="200"></div>
+  <div><label>Salinan maksimum</label><input id="maxCopies" type="number" min="1" max="200"></div>
+  <div><label>Simpan riwayat (hari)</label><input id="retentionDays" type="number" min="1" max="3650"></div>
+  <div><label>Batas job per jam per komputer</label><input id="maxJobsPerHour" type="number" min="1" max="1000"></div>
+  <div><label>Jumlah riwayat maksimum disimpan</label><input id="maxHistory" type="number" min="100" max="50000"></div>
+ </div>
+ <div class="row"><button onclick="saveSet()">Simpan</button><span id="smsg"></span></div>
+</div>
+
+<div class="card"><h2>Keamanan</h2>
+ <p class="sub">PIN cetak diminta dari semua pengguna. Tanpa PIN admin, halaman ini hanya bisa dibuka dari komputer server.</p>
+ <div class="grid">
+  <div><label>PIN cetak <small id="haspin"></small></label><input id="npin" type="password" placeholder="(tidak diubah)" autocomplete="new-password"></div>
+  <div><label>PIN admin <small id="hasadm"></small></label><input id="nadm" type="password" placeholder="(tidak diubah)" autocomplete="new-password"></div>
+ </div>
+ <div class="row"><button onclick="savePins(false)">Simpan PIN</button><button class="s" onclick="savePins(true)">Hapus kedua PIN</button><span id="pmsg"></span></div>
+</div>
+
+<div class="card"><h2>Log galat terakhir</h2><div id="logs" style="margin-top:8px">-</div>
+ <div class="row"><button class="s" onclick="loadLogs()">Refresh</button></div></div>
+<p class="muted">Port dan ALLOW_PREFIX diatur di file <code>.env</code>, lalu jalankan <code>restart.bat</code>. <span id="ver"></span></p>
+</main>
+<script>
+const $=id=>document.getElementById(id),esc=s=>String(s).replace(/[&<>"]/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;'}[c]));
+const pinEl=$('pin');try{pinEl.value=sessionStorage.getItem('lp_admin_pin')||''}catch{}
+const H=()=>({'x-pin':pinEl.value,'Content-Type':'application/json'});
+async function api(u,o={}){const r=await fetch(u,{...o,headers:{...H(),...(o.headers||{})}});const j=await r.json().catch(()=>({}));if(!r.ok)throw new Error(j.error||('HTTP '+r.status));return j}
+const flash=(id,t,ok)=>{const e=$(id);e.className=ok?'ok':'err';e.textContent=t;if(ok)setTimeout(()=>{if(e.textContent===t)e.textContent=''},4000)};
+const SRC={settings:'halaman ini',env:'file .env',auto:'terdeteksi otomatis',default:'bawaan'};
+let TOOLS=[];
+async function loadTools(){TOOLS=await api('/api/admin/tools');
+ $('tools').innerHTML=TOOLS.map(t=>`<div class="tool"><div class="th"><b>${esc(t.label)}</b>
+  <span class="badge ${t.exists?'ok':'no'}">${t.exists?'Ditemukan':'Tidak ditemukan'}</span><small>sumber: ${SRC[t.source]||t.source}</small></div>
+  <small>${esc(t.note)}</small>
+  <label>Lokasi file</label><input id="t_${t.key}" value="${esc(t.configured)}" placeholder="${esc(t.example)}">
+  ${t.configured&&!t.configuredOk?'<div class="err">Path yang tersimpan tidak ada lagi; sementara dipakai: '+esc(t.path||'-')+'</div>':''}
+  <div class="tl"><small>Dipakai sekarang: <code>${esc(t.path||'-')}</code></small>
+   ${t.detected?`<button class="s" onclick="useDet('${t.key}')">Isi dengan hasil deteksi</button>`:''}
+   <button class="s" onclick="$('t_${t.key}').value=''">Kosongkan</button>
+   <a href="${esc(t.url)}" target="_blank" rel="noopener">Unduh ${esc(t.label)}</a></div></div>`).join('')}
+function useDet(k){const t=TOOLS.find(x=>x.key===k);if(t)$('t_'+k).value=t.detected}
+async function saveTools(){const b={};for(const t of TOOLS)b[t.key]=$('t_'+t.key).value;
+ try{await api('/api/admin/tools',{method:'PUT',body:JSON.stringify(b)});flash('tmsg','Tersimpan',true);await loadTools()}catch(e){flash('tmsg',e.message,false)}}
+async function loadSet(){const s=await api('/api/admin/settings');
+ for(const k of ['appName','defaultPrinter','maxMb','maxCopies','retentionDays','maxJobsPerHour','maxHistory'])$(k).value=s[k];
+ $('title').textContent=s.appName;$('haspin').textContent=s.hasPin?'(aktif)':'(belum diatur)';$('hasadm').textContent=s.hasAdminPin?'(aktif)':'(belum diatur)';$('ver').textContent='Versi '+s.version}
+async function saveSet(){const b={};for(const k of ['appName','defaultPrinter','maxMb','maxCopies','retentionDays','maxJobsPerHour','maxHistory'])b[k]=$(k).value;
+ try{await api('/api/admin/settings',{method:'PUT',body:JSON.stringify(b)});flash('smsg','Tersimpan',true);loadSet()}catch(e){flash('smsg',e.message,false)}}
+async function savePins(clear){const b={};
+ if(clear){b.pin='';b.adminPin=''}else{if($('npin').value)b.pin=$('npin').value;if($('nadm').value)b.adminPin=$('nadm').value}
+ if(!Object.keys(b).length)return flash('pmsg','Isi PIN baru dulu',false);
+ try{await api('/api/admin/settings',{method:'PUT',body:JSON.stringify(b)});
+  if('adminPin' in b){pinEl.value=b.adminPin;try{sessionStorage.setItem('lp_admin_pin',b.adminPin)}catch{}}
+  $('npin').value=$('nadm').value='';flash('pmsg','Tersimpan',true);loadSet()}catch(e){flash('pmsg',e.message,false)}}
+async function loadLogs(){try{const l=await api('/api/admin/logs');$('logs').textContent=l.length?l.join('\n'):'Tidak ada galat tercatat.'}catch(e){$('logs').textContent=e.message}}
+async function loadPrinters(){try{const p=await fetch('/api/printers',{headers:{'x-pin':pinEl.value}}).then(r=>r.ok?r.json():[]);$('plist').innerHTML=p.map(x=>`<option value="${esc(x.name)}">`).join('')}catch{}}
+// ---- riwayat ----
+const ST={processing:'Diproses',submitted:'Terkirim ke spooler',completed:'Selesai',left_queue:'Keluar dari antrean',failed:'Gagal',canceled:'Dibatalkan'};
+const CL={color:'warna',gray:'grayscale',bw:'hitam-putih'},SD={one:'1 sisi',long:'2 sisi',short:'2 sisi (pendek)'},OR={auto:'orientasi auto',portrait:'portrait',landscape:'landscape'};
+let hoff=0,htotal=0;const HL=50;
+async function loadJobs(reset){if(reset)hoff=0;
+ const qs=new URLSearchParams({limit:HL,offset:hoff,q:$('hq').value,status:$('hst').value});
+ try{const r=await api('/api/admin/jobs?'+qs);htotal=r.total;
+  $('jt').innerHTML='<tr><th>Waktu</th><th>Dokumen</th><th>Printer</th><th>Komputer</th><th>Opsi</th><th>Status</th><th></th></tr>'+
+   (r.items.map(x=>{const o=x.options||{};
+    return `<tr><td>${esc(new Date(x.time).toLocaleString())}</td><td>${esc(x.doc)}</td><td>${esc(x.printer)}</td><td>${esc(String(x.client||'').replace('::ffff:',''))}</td>
+    <td><small>${esc(o.copies||1)}x &middot; ${esc(o.paper||'')} &middot; ${esc(OR[o.orientation]||o.orientation||'')} &middot; ${esc(CL[o.color]||o.color||'')} &middot; ${esc(SD[o.sides]||o.sides||'')}</small></td>
+    <td>${esc(ST[x.status]||x.status)}${x.error?'<br><span class="err">'+esc(x.error)+'</span>':''}</td>
+    <td>${x.status==='submitted'&&x.spoolId?`<button class="s" onclick="cx('${esc(x.id)}')">Batal</button>`:''}</td></tr>`}).join('')||'<tr><td colspan="7" class="muted">Belum ada riwayat.</td></tr>');
+  const to=Math.min(htotal,hoff+HL);$('hinfo').textContent=htotal?`${hoff+1}-${to} dari ${htotal}`:'0 data';
+  $('hprev').disabled=hoff<=0;$('hnext').disabled=to>=htotal}
+ catch(e){$('jt').innerHTML='<tr><td class="err">'+esc(e.message)+'</td></tr>'}}
+function hpage(d){hoff=Math.max(0,hoff+d*HL);loadJobs(false)}
+async function cx(id){try{await api('/api/admin/jobs/'+id+'/cancel',{method:'POST'});flash('hmsg','Dibatalkan',true)}catch(e){flash('hmsg',e.message,false)}loadJobs(false)}
+async function exportCsv(){try{const r=await fetch('/api/admin/jobs/export',{headers:H()});if(!r.ok)throw new Error('HTTP '+r.status);
+  const a=document.createElement('a');a.href=URL.createObjectURL(await r.blob());a.download='riwayat-cetak.csv';a.click();URL.revokeObjectURL(a.href)}catch(e){flash('hmsg',e.message,false)}}
+let hq;$('hq').oninput=()=>{clearTimeout(hq);hq=setTimeout(()=>loadJobs(true),300)};$('hst').onchange=()=>loadJobs(true);
+setInterval(()=>{if($('hauto').checked&&hoff===0&&!document.hidden)loadJobs(false)},10000);
+async function loadAll(){try{await Promise.all([loadSet(),loadTools(),loadLogs(),loadJobs(true)]);$('auth').textContent='';loadPrinters()}catch(e){$('auth').textContent=e.message}}
+pinEl.onchange=()=>{try{sessionStorage.setItem('lp_admin_pin',pinEl.value)}catch{}loadAll()};
+loadAll();
+</script></body></html>

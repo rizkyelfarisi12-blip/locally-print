@@ -1,3 +1,20 @@
-{ "name":"localprint","version":"0.1.0","main":"server.js",
-  "scripts":{"start":"node server.js","test":"node --test test/validate.test.js","test:int":"node --test test/integration.test.js"},
-  "dependencies":{"express":"^4.19.2","pdfjs-dist":"3.11.174","multer":"^1.4.5-lts.1"} }
+{
+  "name": "localprint",
+  "version": "1.1.0",
+  "private": true,
+  "main": "server.js",
+  "engines": {
+    "node": ">=18"
+  },
+  "scripts": {
+    "start": "node server.js",
+    "test": "node --test test/validate.test.js test/layout.test.js test/integration.test.js",
+    "test:int": "node --test test/integration.test.js"
+  },
+  "dependencies": {
+    "express": "^4.19.2",
+    "multer": "^2.0.2",
+    "pdf-lib": "^1.17.1",
+    "pdfjs-dist": "3.11.174"
+  }
+}

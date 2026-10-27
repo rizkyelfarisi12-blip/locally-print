@@ -1,351 +1,104 @@
 <!doctype html><html lang="id"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1"><title>LocalPrint</title>
-        <style>
-            :root {
-                --p: #4f46e5;
-                --b: #e5e7eb;
-            }
-            * {
-                box-sizing: border-box;
-            }
-            body {
-                margin: 0;
-                font:
-                    14px system-ui,
-                    sans-serif;
-                background: #f6f7fb;
-                color: #1e1b4b;
-            }
-            header {
-                display: flex;
-                justify-content: space-between;
-                align-items: center;
-                padding: 12px 24px;
-                background: #fff;
-                border-bottom: 1px solid var(--b);
-            }
-            h1 {
-                font-size: 18px;
-                margin: 0;
-                color: var(--p);
-            }
-            .pill {
-                padding: 3px 10px;
-                border-radius: 99px;
-                background: #dcfce7;
-                color: #166534;
-                font-size: 12px;
-            }
-            main {
-                display: grid;
-                grid-template-columns: 96px 1fr 330px;
-                gap: 14px;
-                padding: 14px;
-                max-width: 1400px;
-                margin: auto;
-            }
-            
-            
-            @media (max-width: 1000px) {
-                main {
-                    display: grid;
-                    grid-template-columns: minmax(0, 1fr);
-                    gap: 8px;
-                    padding: 8px;
-                }
-
-                /* Biarkan isi kolom utama mengikuti urutan grid */
-                main > div:not(#thumbs):not(.card) {
-                    display: contents;
-                }
-
-                /* Urutan elemen pada HP */
-                #thumbs {
-                    order: 1;
-                    display: flex;
-                    gap: 8px;
-                    overflow-x: auto;
-                    overflow-y: hidden;
-                    max-height: none !important;
-                    min-width: 0;
-                    padding: 8px;
-                    margin: 0;
-                }
-
-                main > div:not(#thumbs):not(.card) > .card:nth-child(1) {
-                    order: 2;
-                }
-
-                main > div:not(#thumbs):not(.card) > .card:nth-child(2) {
-                    order: 3;
-                }
-
-                main > .card {
-                    order: 4;
-                }
-
-                main > div:not(#thumbs):not(.card) > .card:nth-child(3) {
-                    order: 5;
-                }
-
-                /* Kartu lebih ringkas */
-                .card {
-                    min-width: 0;
-                    padding: 10px;
-                    border-radius: 12px;
-                    margin-bottom: 0;
-                }
-
-                header {
-                    padding: 10px 12px;
-                }
-
-                h1 {
-                    font-size: 17px;
-                }
-
-                #drop {
-                    padding: 16px 10px;
-                    font-size: 13px;
-                }
-
-                /* Preview tidak terlalu besar di layar HP */
-                #stage {
-                    height: 45vh;
-                    min-height: 240px;
-                    max-height: 380px;
-                    padding: 8px;
-                }
-
-                .tb {
-                    gap: 5px;
-                }
-
-                .tb button {
-                    padding: 5px 7px;
-                    font-size: 11px;
-                }
-
-                /* Pengaturan tetap mudah disentuh */
-                label {
-                    margin: 7px 0 3px;
-                }
-
-                select,
-                input[type="text"],
-                input[type="number"],
-                input:not([type]),
-                input[type="password"] {
-                    font-size: 14px;
-                    padding: 7px;
-                }
-
-                /* Riwayat bisa digeser horizontal jika tabel lebar */
-                #jt {
-                    display: block;
-                    overflow-x: auto;
-                    max-width: 100%;
-                }
-            }
-
-
-            .card {
-                background: #fff;
-                border: 1px solid var(--b);
-                border-radius: 14px;
-                padding: 14px;
-                box-shadow: 0 1px 3px #0001;
-                margin-bottom: 14px;
-            }
-            #drop {
-                border: 2px dashed #a5b4fc;
-                border-radius: 14px;
-                padding: 22px;
-                text-align: center;
-                cursor: pointer;
-                transition: 0.2s;
-            }
-            #drop.over {
-                background: #eef2ff;
-            }
-            #thumbs {
-                max-height: 78vh;
-                overflow: auto;
-                padding: 8px;
-            }
-            .th {
-                position: relative;
-                margin-bottom: 8px;
-                border: 2px solid transparent;
-                border-radius: 6px;
-                cursor: pointer;
-                text-align: center;
-                flex: none;
-            }
-            .th canvas {
-                width: 72px;
-                display: block;
-                margin: auto;
-                background: #fff;
-                box-shadow: 0 1px 3px #0003;
-            }
-            .th.cur {
-                border-color: var(--p);
-            }
-            .th.out {
-                opacity: 0.35;
-            }
-            .th small {
-                font-size: 10px;
-            }
-            .tb {
-                display: flex;
-                gap: 6px;
-                align-items: center;
-                flex-wrap: wrap;
-                margin-bottom: 8px;
-            }
-            .tb button {
-                padding: 5px 9px;
-            }
-            #stage {
-                background: #e5e7eb;
-                border-radius: 10px;
-                height: 68vh;
-                overflow: auto;
-                padding: 16px;
-                position: relative;
-            }
-            #sheet {
-                background: #fff;
-                margin: auto;
-                box-shadow: 0 4px 18px #0003;
-                display: flex;
-                align-items: center;
-                justify-content: center;
-                transition:
-                    width 0.15s,
-                    height 0.15s;
-                overflow: hidden;
-            }
-            #spin {
-                position: absolute;
-                inset: 0;
-                display: none;
-                align-items: center;
-                justify-content: center;
-                background: #fff8;
-                font-weight: 600;
-            }
-            label {
-                display: block;
-                margin: 9px 0 3px;
-                font-weight: 600;
-                font-size: 12px;
-            }
-            select,
-            input[type="text"],
-            input[type="number"],
-            input:not([type]),
-            input[type="password"] {
-                width: 100%;
-                padding: 7px;
-                border: 1px solid #d1d5db;
-                border-radius: 8px;
-            }
-            button {
-                background: var(--p);
-                color: #fff;
-                border: 0;
-                border-radius: 9px;
-                padding: 10px 14px;
-                font-weight: 600;
-                cursor: pointer;
-            }
-            button:disabled {
-                opacity: 0.5;
-            }
-            button.s {
-                background: #e0e7ff;
-                color: #3730a3;
-                padding: 3px 8px;
-                font-size: 12px;
-            }
-            #msg {
-                margin-top: 8px;
-                font-size: 13px;
-            }
-            .err {
-                color: #b91c1c;
-            }
-            .ok {
-                color: #166534;
-            }
-            td {
-                padding: 4px 6px;
-                border-top: 1px solid #eee;
-                font-size: 12px;
-            }
-            table {
-                width: 100%;
-                border-collapse: collapse;
-            }
-            .cb {
-                display: flex;
-                gap: 6px;
-                align-items: center;
-                font-weight: 400;
-            }
-            .cb input {
-                width: auto;
-            }
-            summary {
-                cursor: pointer;
-                font-weight: 600;
-                margin-top: 10px;
-            }
-            #sum {
-                font-size: 12px;
-                background: #f9fafb;
-                border-radius: 8px;
-                padding: 8px;
-                margin-top: 8px;
-                line-height: 1.6;
-            }
-        </style></head><body>
-        <header><h1>🖨 LocalPrint</h1><div><span class="pill">Online</span> <input id="pin" type="password" placeholder="PIN" style="width:80px;display:none"></div></header>
-        <main>
-            <div id="thumbs" class="card"></div>
-            <div>
-                <div class="card"><div id="drop">Seret file ke sini atau klik untuk Browse Files<br><small>PDF, DOC/DOCX, JPG, PNG, TXT</small><input id="f" type="file" hidden accept=".pdf,.doc,.docx,.jpg,.jpeg,.png,.txt"></div><div id="fi" style="margin-top:8px"></div></div>
-                <div class="card"><div class="tb">
-                        <button class="s" onclick="go(-1)">◀</button><span><input id="pn" type="number" min="1" style="width:56px;padding:3px" onchange="goto(+this.value)"> / <b id="pt">0</b></span><button class="s" onclick="go(1)">▶</button>
-                        <button class="s" onclick="zm(1/1.25)">−</button><button class="s" onclick="zm(1.25)">+</button><button class="s" onclick="fit('page')">Fit page</button><button class="s" onclick="fit('width')">Fit width</button><span id="zl" style="font-size:12px"></span></div>
-                    <div id="stage"><div id="sheet"><canvas id="cv"></canvas></div><div id="spin">Memproses preview…</div></div></div>
-                <div class="card"><b>Riwayat</b> <button class="s" onclick="jobs()">Refresh</button> <a href="/admin.html" style="font-size:12px">Admin</a><table id="jt"></table></div>
-            </div>
-            <div class="card" style="height:fit-content"><b>Pengaturan Cetak</b>
-                <label>Printer <button class="s" onclick="printers()">Refresh</button></label><select id="printer"></select>
-                <label>Halaman</label><select id="ps"><option value="">Semua</option><option value="cur">Halaman ini</option><option value="odd">Ganjil saja</option><option value="even">Genap saja</option><option value="r">Rentang</option></select>
-                <input id="range" placeholder="1-3, 5, 8-10" style="display:none;margin-top:6px">
-                <label>Salinan</label><input id="copies" type="number" value="1" min="1">
-                <label>Kertas</label><select id="paper"><option>A4</option><option>A3</option><option>A5</option><option>Letter</option><option>Legal</option></select>
-                <label>Orientasi</label><select id="orientation"><option value="portrait">Portrait</option><option value="landscape">Landscape</option></select>
-                <label>Warna</label><select id="color"><option value="color">Warna</option><option value="gray">Grayscale</option><option value="bw">Hitam-putih</option></select>
-                <label>Sisi</label><select id="sides"><option value="one">Satu sisi</option><option value="long">Dua sisi (sisi panjang)</option><option value="short">Dua sisi (sisi pendek)</option></select>
-                <label>Skala</label><select id="scaling"><option value="fit">Fit to page</option><option value="actual">Ukuran asli</option><option value="custom">Kustom</option></select><input id="scale" type="number" value="100" min="10" max="400" style="display:none;margin-top:6px" placeholder="%">
-                <label>Margin</label><select id="margin"><option value="default">Default</option><option value="none">Tanpa margin (jika driver mengizinkan)</option></select>
-                <label>Halaman per lembar</label><select id="nup"><option>1</option><option>2</option><option>4</option><option>6</option><option>9</option><option>16</option></select>
-                <label class="cb"><input type="checkbox" id="reverse"> Urutan terbalik</label><label class="cb"><input type="checkbox" id="collate"> Collate</label>
-                <details id="drvbox" style="display:none"><summary>Tray, kualitas &amp; finishing</summary><div id="drv"></div></details>
-                <div id="capnote" style="font-size:11px;color:#6b7280;margin-top:6px"></div>
-                <div id="sum"></div>
-                <p><button id="go" style="width:100%" disabled onclick="pr()">Print Document</button></p><div id="msg"></div></div>
-        </main>
-        <script src="/vendor/pdfjs/pdf.min.js"></script>
-        <script>
+<style>
+:root{--p:#4f46e5;--b:#e5e7eb}
+*{box-sizing:border-box}
+body{margin:0;font:14px system-ui,sans-serif;background:#f6f7fb;color:#1e1b4b}
+header{display:flex;justify-content:space-between;align-items:center;padding:12px 24px;background:#fff;border-bottom:1px solid var(--b)}
+h1{font-size:18px;margin:0;color:var(--p)}
+.pill{padding:3px 10px;border-radius:99px;background:#dcfce7;color:#166534;font-size:12px}
+main{display:grid;grid-template-columns:96px 1fr 330px;gap:14px;padding:14px;max-width:1400px;margin:auto}
+@media (max-width:1000px){
+ main{display:grid;grid-template-columns:minmax(0,1fr);gap:8px;padding:8px}
+ main>div:not(#thumbs):not(.card){display:contents}
+ #thumbs{order:1;display:flex;gap:8px;overflow-x:auto;overflow-y:hidden;max-height:none!important;min-width:0;padding:8px;margin:0}
+ main>div:not(#thumbs):not(.card)>.card:nth-child(1){order:2}
+ main>div:not(#thumbs):not(.card)>.card:nth-child(2){order:3}
+ main>.card{order:4}
+ main>div:not(#thumbs):not(.card)>.card:nth-child(3){order:5}
+ .card{min-width:0;padding:10px;border-radius:12px;margin-bottom:0}
+ header{padding:10px 12px}
+ h1{font-size:17px}
+ #drop{padding:16px 10px;font-size:13px}
+ #stage{height:45vh;min-height:240px;max-height:380px;padding:8px}
+ .tb{gap:5px}
+ .tb button{padding:5px 7px;font-size:11px}
+ label{margin:7px 0 3px}
+ select,input[type=text],input[type=number],input:not([type]),input[type=password]{font-size:14px;padding:7px}
+ #jt{display:block;overflow-x:auto;max-width:100%}
+}
+.card{background:#fff;border:1px solid var(--b);border-radius:14px;padding:14px;box-shadow:0 1px 3px #0001;margin-bottom:14px}
+#drop{border:2px dashed #a5b4fc;border-radius:14px;padding:22px;text-align:center;cursor:pointer;transition:.2s}
+#drop.over{background:#eef2ff}
+#thumbs{max-height:78vh;overflow:auto;padding:8px}
+.th{position:relative;margin-bottom:8px;border:2px solid transparent;border-radius:6px;cursor:pointer;text-align:center;flex:none}
+.th canvas{width:72px;display:block;margin:auto;background:#fff;box-shadow:0 1px 3px #0003}
+.th.cur{border-color:var(--p)}
+.th.out{opacity:.35}
+.th small{font-size:10px}
+.tb{display:flex;gap:6px;align-items:center;flex-wrap:wrap;margin-bottom:8px}
+.tb button{padding:5px 9px}
+#stage{background:#e5e7eb;border-radius:10px;height:68vh;overflow:auto;padding:16px;position:relative}
+#sheet{background:#fff;margin:auto;box-shadow:0 4px 18px #0003;display:flex;align-items:center;justify-content:center;transition:width .15s,height .15s;overflow:hidden}
+#spin{position:absolute;inset:0;display:none;align-items:center;justify-content:center;background:#fff8;font-weight:600}
+label{display:block;margin:9px 0 3px;font-weight:600;font-size:12px}
+select,input[type=text],input[type=number],input:not([type]),input[type=password]{width:100%;padding:7px;border:1px solid #d1d5db;border-radius:8px}
+button{background:var(--p);color:#fff;border:0;border-radius:9px;padding:10px 14px;font-weight:600;cursor:pointer}
+button:disabled{opacity:.5}
+button.s{background:#e0e7ff;color:#3730a3;padding:3px 8px;font-size:12px}
+#msg{margin-top:8px;font-size:13px}
+.err{color:#b91c1c}
+.ok{color:#166534}
+td{padding:4px 6px;border-top:1px solid #eee;font-size:12px}
+table{width:100%;border-collapse:collapse}
+.cb{display:flex;gap:6px;align-items:center;font-weight:400}
+.cb input{width:auto}
+summary{cursor:pointer;font-weight:600;margin-top:10px}
+#sum{font-size:12px;background:#f9fafb;border-radius:8px;padding:8px;margin-top:8px;line-height:1.6}
+.frow{display:flex;gap:6px;align-items:center;padding:4px 6px;margin-top:4px;border-radius:8px}
+.frow.cur{background:#eef2ff}
+.frow a{flex:1;min-width:0;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;color:inherit;text-decoration:none}
+.gl{display:flex;gap:6px;margin-top:10px}
+.gl input{flex:1}
+</style></head><body>
+<header><h1>🖨 LocalPrint</h1><div><a href="/admin.html" style="font-size:12px;margin-right:10px">Admin</a><span class="pill">Online</span> <input id="pin" type="password" placeholder="PIN" style="width:80px;display:none"></div></header>
+<main>
+<div id="thumbs" class="card"></div>
+<div>
+ <div class="card">
+  <div id="drop">Seret file ke sini atau klik untuk Browse Files (boleh banyak file)<br><small>PDF, DOC/DOCX, JPG, PNG, TXT</small><input id="f" type="file" hidden multiple accept=".pdf,.doc,.docx,.jpg,.jpeg,.png,.txt"></div>
+  <div class="gl"><input id="gurl" placeholder="Atau tempel link Google Docs / Sheets / Slides / Drive"><button id="gbtn" onclick="uplUrl()">Ambil</button></div>
+  <small style="color:#6b7280">Dokumen Google harus dibagikan sebagai "Siapa saja yang memiliki link". Beberapa link: pisahkan dengan spasi. Google Sheets mengikuti pilihan Kertas dan Orientasi di kanan (tabel lebar: pilih Landscape).</small>
+  <div id="fi" style="margin-top:8px"></div><div id="fl"></div>
+ </div>
+ <div class="card"><div class="tb">
+   <button class="s" onclick="go(-1)">◀</button><span><input id="pn" type="number" min="1" style="width:56px;padding:3px" onchange="goto(+this.value)"> / <b id="pt">0</b></span><button class="s" onclick="go(1)">▶</button>
+   <button class="s" onclick="zm(1/1.25)">−</button><button class="s" onclick="zm(1.25)">+</button><button class="s" onclick="fit('page')">Muat halaman</button><button class="s" onclick="fit('width')">Muat lebar</button><span id="zl" style="font-size:12px"></span></div>
+  <div id="stage"><div id="sheet"><canvas id="cv"></canvas></div><div id="spin">Memproses preview…</div></div></div>
+</div>
+<div class="card" style="height:fit-content"><b>Pengaturan Cetak</b>
+ <label>Printer <button class="s" onclick="printers()">Refresh</button></label><select id="printer"></select>
+ <label>Halaman</label><select id="ps"><option value="">Semua</option><option value="cur">Halaman ini</option><option value="odd">Ganjil saja</option><option value="even">Genap saja</option><option value="r">Rentang</option></select>
+ <input id="range" placeholder="1-3, 5, 8-10" style="display:none;margin-top:6px">
+ <label>Salinan</label><input id="copies" type="number" value="1" min="1">
+ <label>Kertas</label><select id="paper"><option>A4</option><option>A3</option><option>A5</option><option>Letter</option><option>Legal</option></select>
+ <label>Orientasi</label><select id="orientation"><option value="auto">Otomatis (ikuti dokumen)</option><option value="portrait">Portrait</option><option value="landscape">Landscape</option></select>
+ <label class="cb" id="rotbox" style="display:none"><input type="checkbox" id="rotate" checked> Putar isi halaman agar memenuhi kertas</label>
+ <label>Warna</label><select id="color"><option value="color">Warna</option><option value="gray">Grayscale</option><option value="bw">Hitam-putih</option></select>
+ <label>Sisi</label><select id="sides"><option value="one">Satu sisi</option><option value="long">Dua sisi (sisi panjang)</option><option value="short">Dua sisi (sisi pendek)</option></select>
+ <label>Skala</label><select id="scaling"><option value="fit">Sesuaikan ke kertas (fit to page)</option><option value="actual">Ukuran asli (100%)</option><option value="custom">Kustom (%)</option></select><input id="scale" type="number" value="100" min="10" max="400" style="display:none;margin-top:6px" placeholder="%">
+ <label>Margin</label><select id="margin"><option value="default">Default (6 mm)</option><option value="none">Tanpa margin (tepi bisa terpotong printer)</option></select>
+ <label>Halaman per lembar</label><select id="nup"><option>1</option><option>2</option><option>4</option><option>6</option><option>9</option><option>16</option></select>
+ <label class="cb"><input type="checkbox" id="reverse"> Urutan terbalik</label><label class="cb"><input type="checkbox" id="collate"> Collate</label>
+ <details id="drvbox" style="display:none"><summary>Tray, kualitas &amp; finishing</summary><div id="drv"></div></details>
+ <div id="capnote" style="font-size:11px;color:#6b7280;margin-top:6px"></div>
+ <div id="sum"></div>
+ <p><button id="go" style="width:100%" disabled onclick="pr()">Print Document</button></p><div id="msg"></div></div>
+</main>
+<script src="/vendor/pdfjs/pdf.min.js"></script>
+<script>
 const $=i=>document.getElementById(i),esc=s=>String(s).replace(/[&<>"]/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;'}[c]));
-const SZ={A4:[210,297],A3:[297,420],A5:[148,210],Letter:[216,279],Legal:[216,356]};
-let cur=null,caps=null,doc=null,pg=1,mode='page',z=1,task=null,gen=0;
+const SZ={A4:[210,297],A3:[297,420],A5:[148,210],Letter:[215.9,279.4],Legal:[215.9,355.6]};
+let cur=null,caps=null,doc=null,pg=1,mode='page',z=1,task=null,gen=0,files=[];
 if(window.pdfjsLib)pdfjsLib.GlobalWorkerOptions.workerSrc='/vendor/pdfjs/pdf.worker.min.js';
 const H=()=>({'x-pin':$('pin').value,'Content-Type':'application/json'});
 async function api(u,o={}){const r=await fetch(u,{...o,headers:{...H(),...(o.headers||{})}});const j=await r.json().catch(()=>({}));if(!r.ok)throw new Error(j.error||r.status);return j}
@@ -355,24 +108,31 @@ async function printers(){try{const p=await api('/api/printers'),inf=await api('
 async function loadCaps(){const n=$('printer').value;if(!n)return;try{caps=await api('/api/caps/'+encodeURIComponent(n))}catch{caps=null}
  const o=$('sides').options,d=caps&&caps.detected;for(const x of o)x.disabled=d&&x.value!=='one'&&!caps.duplex;if(d&&!caps.duplex)$('sides').value='one';
  const box=$('drv');box.innerHTML='';const list=d?caps.driver:[];
- for(const x of list)box.insertAdjacentHTML('beforeend',`<label>${esc(x.label)}</label><select data-k="${esc(x.key)}"><option value="">(bawaan driver)</option>${x.values.map(v=>`<option ${v===x.def?'':''}>${esc(v)}</option>`).join('')}</select>`);
+ for(const x of list)box.insertAdjacentHTML('beforeend',`<label>${esc(x.label)}</label><select data-k="${esc(x.key)}"><option value="">(bawaan driver)</option>${x.values.map(v=>`<option>${esc(v)}</option>`).join('')}</select>`);
  $('drvbox').style.display=list.length?'block':'none';
  $('capnote').textContent=d?(caps.duplex?'Duplex didukung. ':'Duplex tidak didukung driver. ')+(list.length?'':'Tray/kualitas/finishing tidak dilaporkan driver.'):'Kemampuan printer tidak terdeteksi (Windows): hanya opsi dasar yang dikirim; tray/kualitas/stapling tidak tersedia.'; summary()}
-// ---- queue ----
-const ST={processing:'Diproses',submitted:'Terkirim ke spooler',completed:'Selesai (dikonfirmasi CUPS)',left_queue:'Keluar dari antrean (tidak terkonfirmasi)',failed:'Gagal',canceled:'Dibatalkan'};
-async function jobs(){try{const j=await api('/api/jobs');$('jt').innerHTML=j.map(x=>`<tr><td>${esc(x.doc)}</td><td>${esc(x.printer)}</td><td>${new Date(x.time).toLocaleString()}</td><td>${ST[x.status]||x.status}${x.error?': '+esc(x.error):''}${x.options&&x.options.grayscaleConverted?' <small>(dikonversi grayscale)</small>':''}</td><td>${x.status==='submitted'&&x.spoolId?`<button class="s" onclick="cx('${x.id}')">Batal</button>`:''}</td></tr>`).join('')}catch{}}
-async function cx(id){try{await api('/api/jobs/'+id+'/cancel',{method:'POST'})}catch(e){msg(e.message,'err')}jobs()}
-setInterval(jobs,5000);
 // ---- preview ----
 function selected(n){const v=$('ps').value;if(v==='cur')return n===pg;if(v==='odd')return n%2===1;if(v==='even')return n%2===0;if(v==='r'){try{return $('range').value.split(',').some(p=>{const[a,b]=p.trim().split('-').map(Number);return b?n>=a&&n<=b:n===a})}catch{return true}}return true}
-function dims(){const[w,h]=SZ[$('paper').value];return $('orientation').value==='landscape'?[h,w]:[w,h]}
+const PT=25.4/72,MARGIN=6; // mm per titik PDF; margin default (mm)
+// Salinan logika plan() di layout.js: preview = hasil cetak.
+function planOf(srcWpt,srcHpt){
+ const o=$('orientation').value,[pw,ph]=SZ[$('paper').value],w0=srcWpt*PT,h0=srcHpt*PT,srcLand=w0>h0;
+ const land=o==='auto'?srcLand:o==='landscape',sw=land?ph:pw,sh=land?pw:ph;
+ const rot=o!=='auto'&&$('rotate').checked&&srcLand!==land&&w0!==h0;
+ const cw=rot?h0:w0,ch=rot?w0:h0,m=$('margin').value==='none'?0:MARGIN,sc=$('scaling').value;
+ const s=sc==='actual'?1:sc==='custom'?(+$('scale').value||100)/100:Math.min((sw-2*m)/cw,(sh-2*m)/ch);
+ return{sw,sh,rot,s}}
 async function render(){if(!doc)return;const my=++gen;$('spin').style.display='flex';
- const[w,h]=dims(),st=$('stage'),aw=st.clientWidth-32,ah=st.clientHeight-32;
- const base=mode==='width'?aw:Math.min(aw,ah*w/h),W=Math.max(120,base*z),Hh=W*h/w;
- const sh=$('sheet');sh.style.width=W+'px';sh.style.height=Hh+'px';$('zl').textContent=Math.round(W/(w*3.78)*100)+'%';
- const page=await doc.getPage(pg),v0=page.getViewport({scale:1}),sc=Math.min(W/v0.width,Hh/v0.height),dpr=devicePixelRatio||1,v=page.getViewport({scale:sc*dpr});
+ const page=await doc.getPage(pg),v0=page.getViewport({scale:1}),P=planOf(v0.width,v0.height);
+ const st=$('stage'),aw=st.clientWidth-32,ah=st.clientHeight-32;
+ const base=mode==='width'?aw:Math.min(aw,ah*P.sw/P.sh),W=Math.max(120,base*z),Hh=W*P.sh/P.sw,pxmm=W/P.sw;
+ const sh=$('sheet');sh.style.width=W+'px';sh.style.height=Hh+'px';$('zl').textContent='Skala cetak '+Math.round(P.s*100)+'%';
+ const dpr=devicePixelRatio||1,k0=P.s*pxmm*PT;let kb=k0*dpr;const big=Math.max(v0.width,v0.height)*kb;if(big>4096)kb*=4096/big;
+ const v=page.getViewport({scale:kb,rotation:(page.rotate+(P.rot?90:0))%360});
  if(task)try{task.cancel()}catch{}
- const c=$('cv');c.width=v.width;c.height=v.height;c.style.width=v.width/dpr+'px';c.style.height=v.height/dpr+'px';c.style.filter=$('color').value==='gray'?'grayscale(1)':$('color').value==='bw'?'grayscale(1) contrast(3)':'';
+ const c=$('cv');c.width=Math.ceil(v.width);c.height=Math.ceil(v.height);
+ c.style.width=(P.rot?v0.height:v0.width)*k0+'px';c.style.height=(P.rot?v0.width:v0.height)*k0+'px';
+ c.style.filter=$('color').value==='gray'?'grayscale(1)':$('color').value==='bw'?'grayscale(1) contrast(3)':'';
  task=page.render({canvasContext:c.getContext('2d'),viewport:v});try{await task.promise}catch{}
  if(my===gen)$('spin').style.display='none';$('pn').value=pg;
  document.querySelectorAll('.th').forEach(t=>t.classList.toggle('cur',+t.dataset.n===pg))}
@@ -381,29 +141,75 @@ const zm=f=>{z=Math.min(4,Math.max(.3,z*f));render()},fit=m=>{mode=m;z=1;render(
 function markThumbs(){document.querySelectorAll('.th').forEach(t=>t.classList.toggle('out',!selected(+t.dataset.n)))}
 async function thumbs(){const box=$('thumbs');box.innerHTML='';const io=new IntersectionObserver(es=>es.forEach(async e=>{if(!e.isIntersecting)return;io.unobserve(e.target);const n=+e.target.dataset.n,p=await doc.getPage(n),v=p.getViewport({scale:1}),s=144/v.width,vp=p.getViewport({scale:s}),c=e.target.querySelector('canvas');c.width=vp.width;c.height=vp.height;await p.render({canvasContext:c.getContext('2d'),viewport:vp}).promise}),{root:null});
  for(let n=1;n<=doc.numPages;n++){const d=document.createElement('div');d.className='th';d.dataset.n=n;d.innerHTML='<canvas width="72" height="100"></canvas><small>'+n+'</small>';d.onclick=()=>goto(n);box.appendChild(d);io.observe(d)}markThumbs()}
-async function upl(file){const fd=new FormData();fd.append('file',file);$('fi').textContent='Mengunggah/memproses '+file.name+'…';
- try{const r=await fetch('/api/upload',{method:'POST',headers:{'x-pin':$('pin').value},body:fd});const j=await r.json();if(!r.ok)throw new Error(j.error);cur=j;
- $('spin').style.display='flex';doc=await pdfjsLib.getDocument({url:'/api/file/'+j.id,httpHeaders:{'x-pin':$('pin').value}}).promise;cur.pages=doc.numPages;pg=1;$('pt').textContent=doc.numPages;$('pn').max=doc.numPages;
- $('fi').innerHTML=`${esc(j.name)} (${(j.size/1024).toFixed(0)} KB, ${doc.numPages} hal) <button class="s" onclick="clr()">Hapus</button>`;
- $('go').disabled=false;await render();thumbs();summary()}catch(e){$('spin').style.display='none';$('fi').innerHTML='<span class="err">'+esc(e.message)+'</span>'}}
-function clr(){cur=null;doc=null;$('thumbs').innerHTML='';$('fi').textContent='';$('go').disabled=true;$('cv').width=1;$('pt').textContent=0}
+// ---- daftar file (banyak file, pengaturan cetak sama untuk semua) ----
+function psLock(){const multi=files.length>1;
+ for(const o of $('ps').options)if(o.value==='cur'||o.value==='r')o.disabled=multi;
+ if(multi&&['cur','r'].includes($('ps').value)){$('ps').value='';$('range').style.display='none'}}
+function renderList(){
+ $('fl').innerHTML=files.map((f,i)=>`<div class="frow ${f===cur?'cur':''}">
+  <a href="#" title="${esc(f.name)}" onclick="pick(${i});return false">${esc(f.name)}</a>
+  <small>${f.pages} hal</small>
+  <small>${f.st==='ok'?'<span class="ok">✔ terkirim</span>':f.st==='err'?'<span class="err">gagal: '+esc(f.err)+'</span>':f.st==='busy'?'mengirim…':''}</small>
+  <button class="s" onclick="rm(${i})">Hapus</button></div>`).join('');
+ psLock()}
+async function pageCountOf(id){const d=await pdfjsLib.getDocument({url:'/api/file/'+id,httpHeaders:{'x-pin':$('pin').value}}).promise;const n=d.numPages;try{d.destroy()}catch{}return n}
+async function pick(i){const f=files[i];if(!f)return;cur=f;$('spin').style.display='flex';
+ try{doc=await pdfjsLib.getDocument({url:'/api/file/'+f.id,httpHeaders:{'x-pin':$('pin').value}}).promise}
+ catch(e){$('spin').style.display='none';$('fi').innerHTML='<span class="err">'+esc(e.message)+'</span>';return}
+ pg=1;f.pages=doc.numPages;$('pt').textContent=doc.numPages;$('pn').max=doc.numPages;
+ $('go').disabled=false;renderList();await render();thumbs();summary()}
+async function push(j,url){let n=j.pages||1;try{n=await pageCountOf(j.id)}catch{}
+ files.push({id:j.id,name:j.name,size:j.size,pages:n,url,kind:j.kind});renderList();
+ if(files.length===1)await pick(0);else summary()}
+function showErrs(errs){$('fi').innerHTML=errs.map(e=>'<div class="err">'+esc(e)+'</div>').join('')}
+async function addFiles(list){const errs=[];
+ for(const file of Array.from(list)){$('fi').textContent='Mengunggah/memproses '+file.name+'…';
+  try{const fd=new FormData();fd.append('file',file);
+   const r=await fetch('/api/upload',{method:'POST',headers:{'x-pin':$('pin').value},body:fd});
+   const j=await r.json().catch(()=>({}));if(!r.ok)throw new Error(j.error||r.status);
+   await push(j)}catch(e){errs.push(file.name+': '+e.message)}}
+ $('fi').textContent='';showErrs(errs)}
+async function uplUrl(){const urls=$('gurl').value.split(/[\s,]+/).filter(Boolean);if(!urls.length)return;
+ $('gbtn').disabled=true;const errs=[];
+ for(const u of urls){$('fi').textContent='Mengambil dari Google…';
+  try{await push(await api('/api/upload-url',{method:'POST',body:JSON.stringify({url:u,paper:$('paper').value,orientation:$('orientation').value})}),u)}
+  catch(e){errs.push(u.slice(0,60)+(u.length>60?'…':'')+': '+e.message)}}
+ if(!errs.length){$('gurl').value='';$('fi').textContent=''}showErrs(errs);$('gbtn').disabled=false}
+// Google Sheets diekspor Google dengan kertas/orientasi tertentu; ekspor ulang bila pilihan berubah.
+let reimp=false;
+async function reimportSheets(){const list=files.filter(f=>f.kind==='Google Sheets'&&f.url);if(!list.length||reimp)return;reimp=true;
+ $('fi').textContent='Menyesuaikan Google Sheets ke kertas/orientasi…';
+ for(const f of list){try{const j=await api('/api/upload-url',{method:'POST',body:JSON.stringify({url:f.url,paper:$('paper').value,orientation:$('orientation').value})});f.id=j.id;f.size=j.size;f.pages=await pageCountOf(j.id);f.st=''}catch(e){f.st='err';f.err=e.message}}
+ reimp=false;$('fi').textContent='';renderList();if(cur&&list.includes(cur))await pick(files.indexOf(cur));else summary()}
+function rm(i){const f=files.splice(i,1)[0];
+ if(f===cur){cur=null;doc=null;$('thumbs').innerHTML='';$('cv').width=1;$('pt').textContent=0;
+  if(files.length)return pick(Math.min(i,files.length-1))}
+ $('go').disabled=!files.length;renderList();summary()}
 // ---- summary & print ----
 function opts(){const ps=$('ps').value,drv={};document.querySelectorAll('#drv select').forEach(s=>{if(s.value)drv[s.dataset.k]=s.value});
- return{pages:cur&&cur.pages,reverse:$('reverse').checked,collate:$('collate').checked,copies:+$('copies').value,paper:$('paper').value,orientation:$('orientation').value,color:$('color').value,scaling:$('scaling').value,scale:+$('scale').value,margin:$('margin').value,sides:$('sides').value,nup:+$('nup').value,
+ return{pages:cur&&cur.pages,rotate:$('rotate').checked,reverse:$('reverse').checked,collate:$('collate').checked,copies:+$('copies').value,paper:$('paper').value,orientation:$('orientation').value,color:$('color').value,scaling:$('scaling').value,scale:+$('scale').value,margin:$('margin').value,sides:$('sides').value,nup:+$('nup').value,
  pageSet:ps==='odd'||ps==='even'?ps:'',range:ps==='r'?$('range').value:ps==='cur'?String(pg):'',printer:$('printer').value,driverOpts:drv}}
-function summary(){markThumbs();if(!cur){$('sum').textContent='';return}const o=opts();let n=0;for(let i=1;i<=cur.pages;i++)if(selected(i))n++;
- const sheets=Math.ceil(n/o.nup/(o.sides==='one'?1:2))*o.copies;
- $('sum').innerHTML=`<b>${esc(cur.name)}</b><br>${esc(o.printer)} · ${n} hal · ${o.copies} salinan<br>${o.paper} ${o.orientation} · ${{gray:'Grayscale',bw:'Hitam-putih',color:'Warna'}[o.color]} · ${o.sides==='one'?'1 sisi':'2 sisi'} · ${o.nup}/lembar<br>Estimasi: <b>${sheets}</b> lembar`}
-async function pr(){const b={...opts(),fileId:cur.id,name:cur.name};$('go').disabled=true;
- try{await api('/api/print',{method:'POST',body:JSON.stringify(b)});msg('Terkirim ke antrean printer. Status selesai diperbarui otomatis di Riwayat bila dapat dikonfirmasi.','ok')}catch(e){msg(e.message,'err')}$('go').disabled=false;jobs()}
+function summary(){markThumbs();if(!files.length){$('sum').textContent='';return}
+ const o=opts();let sheets=0,pages=0;
+ for(const f of files){let n=0;for(let p=1;p<=f.pages;p++)if(selected(p))n++;
+  pages+=n;sheets+=Math.ceil(n/o.nup/(o.sides==='one'?1:2))*o.copies}
+ $('sum').innerHTML=`<b>${files.length===1?esc(files[0].name):files.length+' file'}</b><br>${esc(o.printer)} · ${pages} hal · ${o.copies} salinan<br>${o.paper} ${{auto:'orientasi otomatis',portrait:'portrait',landscape:'landscape'}[o.orientation]} · ${{gray:'Grayscale',bw:'Hitam-putih',color:'Warna'}[o.color]} · ${o.sides==='one'?'1 sisi':'2 sisi'} · ${o.nup}/lembar<br>Estimasi: <b>${sheets}</b> lembar`}
+async function pr(){if(!files.length)return;$('go').disabled=true;let ok=0;
+ for(const f of files){f.st='busy';renderList();
+  try{await api('/api/print',{method:'POST',body:JSON.stringify({...opts(),pages:f.pages,fileId:f.id,name:f.name})});f.st='ok';ok++}
+  catch(e){f.st='err';f.err=e.message}
+  renderList()}
+ msg(ok===files.length?(files.length>1?ok+' file terkirim':'Terkirim')+' ke antrean printer.':ok+' dari '+files.length+' file terkirim; yang gagal ditandai merah.',ok===files.length?'ok':'err');
+ $('go').disabled=false}
 $('ps').onchange=()=>{$('range').style.display=$('ps').value==='r'?'block':'none';summary()};$('range').oninput=summary;
-$('scaling').onchange=()=>{$('scale').style.display=$('scaling').value==='custom'?'block':'none';summary()};
-for(const i of ['margin','scale','paper','orientation','color','sides','nup','copies'])$(i).onchange=()=>{render();summary()};
+$('scaling').onchange=()=>{$('scale').style.display=$('scaling').value==='custom'?'block':'none';render();summary()};
+for(const i of ['margin','scale','paper','orientation','color','sides','nup','copies','rotate'])$(i).onchange=()=>{$('rotbox').style.display=$('orientation').value==='auto'?'none':'flex';render();summary();if(i==='paper'||i==='orientation')reimportSheets()};
 $('printer').onchange=loadCaps;
-$('drop').onclick=()=>$('f').click();$('f').onchange=e=>e.target.files[0]&&upl(e.target.files[0]);
+$('drop').onclick=()=>$('f').click();$('f').onchange=e=>{addFiles(e.target.files);e.target.value=''};
 $('drop').ondragover=e=>{e.preventDefault();$('drop').classList.add('over')};$('drop').ondragleave=()=>$('drop').classList.remove('over');
-$('drop').ondrop=e=>{e.preventDefault();$('drop').classList.remove('over');e.dataTransfer.files[0]&&upl(e.dataTransfer.files[0])};
+$('drop').ondrop=e=>{e.preventDefault();$('drop').classList.remove('over');addFiles(e.dataTransfer.files)};
+$('gurl').onkeydown=e=>{if(e.key==='Enter')uplUrl()};
 addEventListener('resize',()=>render());
 fetch('/api/info').then(r=>r.json()).then(i=>{document.title=i.appName;document.querySelector('h1').textContent='🖨 '+i.appName;if(i.pinRequired)$('pin').style.display='inline-block'});
-$('pin').onchange=()=>{printers();jobs()};printers();jobs();
+$('pin').onchange=printers;printers();
 </script></body></html>

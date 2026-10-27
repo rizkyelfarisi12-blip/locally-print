@@ -1,0 +1,3 @@
+Taruh di sini (opsional) versi portable program pendukung, mis. SumatraPDF.exe atau SumatraPDF-3.5.2-64.exe.
+File di folder ini ikut dicari otomatis jika lokasinya belum diatur.
+Cara yang disarankan: atur lokasi program lewat halaman Admin (http://localhost/admin.html).
